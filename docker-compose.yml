@@ -1,0 +1,52 @@
+version: '3.7'
+
+volumes:
+  ud-db:
+    external: true
+
+services:
+
+
+  db:
+    container_name: ud_db
+    build: 
+      context: ./db
+    environment:
+      - POSTGRES_PASSWORD=undefined
+    ports:
+      - 5432:5432
+    volumes:
+      - ud-db:/var/lib/postgresql/data/
+      - ./db/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./db/pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - ./db/pg_ident.conf:/etc/postgresql/pg_ident.conf
+      - ./db/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    shm_size: 2gb
+    sysctls:
+      net.core.somaxconn: 65535
+      kernel.shmmax: 32212254720
+      kernel.msgmax: 8192
+    command: [
+      "-c", "config_file=/etc/postgresql/postgresql.conf",
+      "-c", "hba_file=/etc/postgresql/pg_hba.conf",
+      "-c", "ident_file=/etc/postgresql/pg_ident.conf",
+    ]
+    restart: always
+
+
+  backend:
+    container_name: ud_backend
+    image: ud_backend
+    build:
+      context: ./backend
+    volumes:
+      - "./backend/:/backend/"
+    command: bash -c "sh migrate.sh && python data_requester.py"
+    ports:
+      - "8000:8000"
+    restart: always
+    depends_on:
+      - db
+
+
+  
