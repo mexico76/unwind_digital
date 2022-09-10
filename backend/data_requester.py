@@ -58,7 +58,7 @@ def main():
             order_db.price_usd = value[2]
             order_db.delivery_time = delivery_date
             try:
-                orders_ids.remove(value[1])
+                orders_ids.remove(int(value[1]))
             except ValueError:
                 pass
         else:

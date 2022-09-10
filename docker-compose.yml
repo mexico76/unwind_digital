@@ -42,8 +42,6 @@ services:
     volumes:
       - "./backend/:/backend/"
     command: bash -c "sh migrate.sh && python data_requester.py"
-    ports:
-      - "8000:8000"
     restart: always
     depends_on:
       - db
